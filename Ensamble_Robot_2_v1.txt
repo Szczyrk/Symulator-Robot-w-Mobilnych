@@ -1,0 +1,1 @@
+using System;  using UnityEngine;  public class Code : MonoBehaviour  {  public static void Main()  {         if (Body1 17)          {              Body1 5= 20;               Body1 6 =20;         }          else         {              Body1 5 = 20;               Body1 6 = -20;          }  }  }

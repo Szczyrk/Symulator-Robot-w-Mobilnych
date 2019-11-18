@@ -1,0 +1,1 @@
+using System;  using UnityEngine;  public class Code : MonoBehaviour  {  public static void Main()  {         if (ad sensor:1 && ad sensor:2)          {              tire1 = 20;               tire3=20;         }          else         {              tire1 = 20;              tire3 = -20;          }  }  }
