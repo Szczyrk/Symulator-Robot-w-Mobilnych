@@ -1,0 +1,24 @@
+using System;
+using System.Threading;
+using UnityEngine;  
+using System.Collections;
+
+public class Code : MonoBehaviour  {  
+   public static void Main()
+   {
+while(true)
+{
+
+if (Body1 17)          {   
+Debug.Log("Widze");           
+Body1 5= 20;              
+ Body1 6=20;         }          
+else         {             
+Debug.Log("Nie widze");
+ Body1 5= 20;             
+ Body1 6= -20;          } 
+
+ Thread.Sleep(500);
+   }
+}
+}

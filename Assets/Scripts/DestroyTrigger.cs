@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class DestroyTrigger : MonoBehaviour
 {
-    Robot last;
+    Robot last = null;
     private void OnTriggerEnter(Collider other)
     {
+        if(last == null)
+            last = other.GetComponentInParent<Robot>();
+        else
         if (last.gameObject != other.GetComponentInParent<Robot>().gameObject)
         {
             last = other.GetComponentInParent<Robot>();
-            Debug.Log("Destroy " + last.gameObject);
-            Destroy(last.gameObject);
-            Simulation.robots.Remove(last);
+            Debug.Log("Stop " + last.gameObject.name);
+            last.transform.GetComponent<Rigidbody>().isKinematic = true;
         }
    }
 

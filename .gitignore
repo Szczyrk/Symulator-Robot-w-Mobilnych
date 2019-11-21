@@ -10,6 +10,11 @@
 sysinfo.txt
 *.pidb.meta
 
+# ==================== #
+# Simulation generated #
+# ==================== #
+/*.dll
+
 # ===================================== #
 # Visual Studio / MonoDevelop generated #
 # ===================================== #
@@ -28,7 +33,9 @@ sysinfo.txt
 *.vs/*/v14/*.suo
 *.vs/*/v15/*.suo
 *.vs/*/v15/Server/sqlite3/*
- 
+*.vs/*/v16/*.suo
+*.vs/*/v16/Server/sqlite3/*
+
 # ============ #
 # OS generated #
 # ============ #

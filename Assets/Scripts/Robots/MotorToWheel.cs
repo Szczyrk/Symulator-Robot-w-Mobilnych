@@ -11,6 +11,7 @@ public class MotorToWheel : MonoBehaviour {
 	public float Kp = 0.5f;
 	
 	public WheelCollider wheelCollider;
+    MeshRenderer mesh;
     public float powerMotor;
     private float torque;
 
@@ -28,6 +29,7 @@ public class MotorToWheel : MonoBehaviour {
 
     void Start() {
         wheelCollider = transform.GetComponent<WheelCollider>();
+        mesh = GetComponent<MeshRenderer>();
         JointSpring suspensionSpring = wheelCollider.suspensionSpring;
         suspensionSpring.spring = 0;
         suspensionSpring.damper = 0;

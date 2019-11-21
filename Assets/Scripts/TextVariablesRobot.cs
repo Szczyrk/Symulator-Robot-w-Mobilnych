@@ -22,14 +22,14 @@ public class TextVariablesRobot : MonoBehaviour
     void Start()
     {
         robot = transform.GetComponent<Robot>();
-        if (GameObject.Find("Canvas/InputField_Imag/InputField/Text Start"))
+        if (GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_InputField/InputField/Text Start"))
         {
-            textTMPStart = GameObject.Find("Canvas/InputField_Imag/InputField/Text Start").GetComponent<TMP_Text>();
+            textTMPStart = GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_InputField/InputField/Text Start").GetComponent<TMP_Text>();
             UpdateVariables();
         }
-        if (GameObject.Find("Canvas/InputField_Imag/InputField/InputFieldCode"))
+        if (GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_InputField/InputField/InputFieldCode"))
         {
-            textCode = GameObject.Find("Canvas/InputField_Imag/InputField/InputFieldCode").GetComponent<InputField>();
+            textCode = GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_InputField/InputField/InputFieldCode").GetComponent<InputField>();
            UpdateCode();
         }
     }
@@ -37,7 +37,7 @@ public class TextVariablesRobot : MonoBehaviour
     public void UpdateCode()
     {
         if (textCode == null)
-            textCode = GameObject.Find("Canvas/InputField_Imag/InputField/InputFieldCode").GetComponent<InputField>();
+            textCode = GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_InputField/InputField/InputFieldCode").GetComponent<InputField>();
         string path = "Assets/Resources/ExampleCode.txt";
         if (File.Exists(robot.nameWithoutSpace + ".txt"))
         {
@@ -50,7 +50,7 @@ public class TextVariablesRobot : MonoBehaviour
     public void UpdateVariables()
     {
         if(textTMPStart == null)
-            textTMPStart = GameObject.Find("Canvas/InputField_Imag/InputField/Text Start").GetComponent<TMP_Text>();
+            textTMPStart = GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_InputField/InputField/Text Start").GetComponent<TMP_Text>();
         textTMPStart.text = robot.name + "\n";
         textTMPStart.text += "//Sensors:  \n";
         foreach (Sensor sensor in robot.sensors)

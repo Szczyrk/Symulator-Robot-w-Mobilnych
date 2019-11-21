@@ -33,6 +33,7 @@ public class UI_Manager : MonoBehaviour
                     sizeCalculated = tmp;
             }
         }
+        add.onClick.AddListener(() => ButtonAdd());
         add.gameObject.SetActive(false);
         button.gameObject.SetActive(false);
         parent = button.GetComponentInParent<Transform>();
@@ -98,7 +99,6 @@ public class UI_Manager : MonoBehaviour
             countElementInHeight++;
         }
         add.transform.position = button.transform.position + (new Vector3(offsetW * countElementInWidth, offsetH * countElementInHeight, 0));
-        add.onClick.AddListener(() => ButtonAdd());
         add.gameObject.SetActive(true);
     }
 

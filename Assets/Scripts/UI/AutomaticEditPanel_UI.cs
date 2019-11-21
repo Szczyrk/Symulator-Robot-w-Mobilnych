@@ -19,10 +19,12 @@ public class AutomaticEditPanel_UI : MonoBehaviour
         inputField = GameObject.Find("Canvas/InputFieldExample").GetComponent<TMP_InputField>();
         editPanelContent = this.gameObject;
         ci.NumberFormat.CurrencyDecimalSeparator = ".";
+        IndividualEdit.editPanel.SetActive(false);
     }
 
     public static void Start_UI()
     {
+       Draw.Instance.Clear();
         foreach (Transform child in editPanelContent.transform)
         {
             GameObject.Destroy(child.gameObject);
@@ -45,6 +47,7 @@ public class AutomaticEditPanel_UI : MonoBehaviour
             var element =parentButton.AddComponent<LayoutElement>();
             element.minHeight = 20;
             parentButton.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 30);
+            Draw.Instance.AddCircle(motor);
             AddButtonDelete(parentButton).onClick.AddListener(() => ButtonActionDelete(null, motor, parent));
                 AddButtonSelect(parentButton).onClick.AddListener(() => ButtonActionSelect(motor.gameObject));
                 TMP_InputField textInputFieldRPM = AddInputField("Maksymalne obroty na minute...", parent);
@@ -81,6 +84,7 @@ public class AutomaticEditPanel_UI : MonoBehaviour
             var element = parentButton.AddComponent<LayoutElement>();
             element.minHeight = 20;
             parentButton.GetComponent<RectTransform>().sizeDelta = new Vector2(180, 30);
+            DrawSensor(sensor);
             AddButtonDelete(parentButton).onClick.AddListener(() => ButtonActionDelete(sensor, null, parent));
             AddButtonSelect(parentButton).onClick.AddListener(() => ButtonActionSelect(sensor.gameObject));
 
@@ -142,10 +146,17 @@ public class AutomaticEditPanel_UI : MonoBehaviour
 
     static void ButtonActionDelete(ParamSensor sensor, MotorToWheel motor, GameObject parent)
     {
-        if(sensor != null)
+        if (sensor != null)
+        {
             Destroy(sensor);
+            Destroy(sensor.transform.GetChild(0).gameObject);
+            DrawSensorUpdate();
+        }
         else
+        {
             Destroy(motor);
+            DrawMotorUpdate();
+        }
         Destroy(parent);
     }
 
@@ -188,31 +199,87 @@ public class AutomaticEditPanel_UI : MonoBehaviour
 
     static void ChangeValueMotorRPM(MotorToWheel motorToWheel, string value)
     {
-        motorToWheel.maxWheelRpm = float.Parse(value,ci);
+        try
+        {
+            motorToWheel.maxWheelRpm = float.Parse(value, ci);
+        }
+        catch (Exception e) { }
+        DrawMotorUpdate();
     }
 
     static void ChangeValueMotorTorque(MotorToWheel motorToWheel, string value)
     {
-        motorToWheel.maxWheelTorque = float.Parse(value, ci);
+        try
+        {
+            motorToWheel.maxWheelTorque = float.Parse(value, ci);
+        }
+        catch (Exception e) { }
+        DrawMotorUpdate();
     }
 
     private static void ChangeValueMotorRadius(MotorToWheel motor, string text)
     {
-        motor.wheelCollider.radius = float.Parse(text, ci);
+        try
+        {
+            motor.wheelCollider.radius = float.Parse(text, ci);
+        }
+        catch (Exception e) { }
+        DrawMotorUpdate();
     }
 
     static void ChangeValueSensorRange(ParamSensor sensor, string value)
     {
-        sensor.maxRange = float.Parse(value, ci);
+        try
+        {
+            sensor.maxRange = float.Parse(value, ci);
+        }
+        catch (Exception e) { }
+        DrawSensorUpdate();
     }
 
     static void ChangeValueSensorUpdateDT(ParamSensor sensor, string value)
     {
-        sensor.updateDt = float.Parse(value, ci);
+        try
+        {
+            sensor.updateDt = float.Parse(value, ci);
+        }
+        catch (Exception e) { }
+        DrawSensorUpdate();
     }
     static void ChangeValueSensorFov(ParamSensor sensor, string value)
     {
-        sensor.FOV = float.Parse(value, ci);
+        try
+        {
+            sensor.FOV = float.Parse(value, ci);
+        }
+        catch (Exception e) { }
+        DrawSensorUpdate();
+    }
+    static void DrawSensorUpdate()
+    {
+        Draw.Instance.ClearLine();
+        foreach (ParamSensor sensor in Simulation.robotSelected.sensors)
+        {
+            DrawSensor(sensor);
+        }
+    }
+    static void DrawSensor(ParamSensor sensor)
+    {
+        for (float a = -sensor.FOV; a < sensor.FOV; a += 2f)
+        {
+            Quaternion rotation = Quaternion.Euler(new Vector3(0,  a, 0));
+            Vector3 direction = rotation * sensor.startLight.forward;
+            Draw.Instance.Line(sensor.startLight.position, sensor.startLight.position + direction * sensor.maxRange, Color.green);
+        }
+    }
+
+    static void DrawMotorUpdate()
+    {
+        Draw.Instance.ClearCircle();
+        foreach (MotorToWheel motor in Simulation.robotSelected.motors)
+        {
+            Draw.Instance.AddCircle(motor);
+        }
     }
 
 }

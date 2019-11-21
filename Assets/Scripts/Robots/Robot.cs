@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Reflection;
 using System.IO;
+using System.Threading;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(TextVariablesRobot))]
@@ -22,6 +23,7 @@ public class Robot : MonoBehaviour, IObjectDimensions {
     public Sensor[] sensors;
 	private Vector3 	_size;
     private MethodInfo[] methods;
+    Thread thread;
     public TextVariablesRobot textVariables;
     internal bool reload;
     public Vector3 startPostion;
@@ -54,9 +56,6 @@ public class Robot : MonoBehaviour, IObjectDimensions {
 	public void Reset() {
         transform.position = startPostion;
         transform.rotation = startRotation;
-        foreach (Sensor s in sensors) {
-			s.Disable();
-		}
         
         if (rigidbody != null)
         {
@@ -79,7 +78,8 @@ public class Robot : MonoBehaviour, IObjectDimensions {
         motors = GetComponentsInChildren<MotorToWheel>();
         sensors = GetComponentsInChildren<Sensor>();
         rigidbody = GetComponent<Rigidbody>();
-        Simulation.robots.Add(this);
+        if(!Simulation.robots.Contains(this))
+            Simulation.robots.Add(this);
         textVariables = GetComponent<TextVariablesRobot>();
         nameWithoutSpace = this.name.Replace(" ", "_");
         nameWithoutSpace = nameWithoutSpace.Replace("(", "");
@@ -94,12 +94,38 @@ public class Robot : MonoBehaviour, IObjectDimensions {
 
     public void initializationCode()
     {
-        var DLL = Assembly.LoadFrom(nameWithoutSpace+".dll");
-        Type type = DLL.GetType(nameWithoutSpace);
-        methods = type.GetMethods();
-        Assembly.UnsafeLoadFrom(nameWithoutSpace + ".dll");
+        /* AppDomain dom = AppDomain.CreateDomain(nameWithoutSpace);
+          AssemblyName assemblyName = new AssemblyName();
+          assemblyName.CodeBase = nameWithoutSpace + ".dll";
+          Assembly assembly = dom.Load(assemblyName);
+          Type type = assembly.GetType(nameWithoutSpace);
+          methods = type.GetMethods();
+          AppDomain.Unload(dom);*/
+        if (File.Exists(nameWithoutSpace + ".dll"))
+        {
+            var DLL = Assembly.LoadFile(nameWithoutSpace + ".dll");
+            Type type = DLL.GetType(nameWithoutSpace);
+            methods = type.GetMethods();
+            Assembly.UnsafeLoadFrom(nameWithoutSpace + ".dll");
+            thread = new Thread(() =>
+            {
+                methods[0].Invoke(this, new object[] { this });
+            });
+            thread.Start();
+        }
+        else
+        {
+            Debug.Log("No code for " + name);
+        }
 
     }
+
+    public void UnInitializationCode()
+    {
+        methods = null;
+    }
+
+
     public void StartSensor()
     {
         foreach (Sensor sensor in sensors)
@@ -135,7 +161,13 @@ public class Robot : MonoBehaviour, IObjectDimensions {
 		else if (Simulation.isRunning){
 
             //Code();
-            methods[0].Invoke(this,new object[] { this});
+           /* if (methods != null && !thread.IsAlive)
+            {
+                
+                thread.Join();
+            }
+            else
+                Debug.Log("Robot " + name + " has no code");*/
 
             foreach (MotorToWheel motor in motors)
             {

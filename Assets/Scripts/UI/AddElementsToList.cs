@@ -10,7 +10,7 @@ public class AddElementsToList : MonoBehaviour
     static Transform button;
     void Start()
     {
-        listPanel = GameObject.Find("Canvas/Scroll View_Elements robot/Viewport/Content");
+        listPanel = GameObject.Find("Canvas/PanelMain/RightPanel/Panel/Scroll View_Elements robot/Viewport/Content");
         button = this.transform.GetChild(0);
         button.gameObject.SetActive(false);
     }
@@ -18,9 +18,9 @@ public class AddElementsToList : MonoBehaviour
    public static void Start_UI(GameObject robot)   
     {
         if (button == null)
-            button = GameObject.Find("Canvas/Scroll View_Elements robot/Viewport/Content/Button").transform;
+            button = GameObject.Find("Canvas/PanelMain/RightPanel/Panel/Scroll View_Elements robot/Viewport/Content/Button").transform;
         if(listPanel == null)
-            listPanel = GameObject.Find("Canvas/Scroll View_Elements robot/Viewport/Content");
+            listPanel = GameObject.Find("Canvas/PanelMain/RightPanel/Panel/Scroll View_Elements robot/Viewport/Content");
         button.gameObject.SetActive(true);
         var elements = robot.GetComponentsInChildren<MeshRenderer>();
         foreach (MeshRenderer meshRenderer in elements)

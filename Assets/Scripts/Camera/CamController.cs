@@ -178,19 +178,6 @@ public class CamController : MonoBehaviour {
 	private Vector3 _1stPersonDir = Vector3.one;	// camera direction when in free movement mode
 	
 
-	public void OnTestStart() {
-		if (Simulation.exhibitionMode) {
-			RandomViewMode();
-			CycleAreaOfInterest();
-		}
-	}
-	
-	public void OnTestEnd() {
-		if (Simulation.exhibitionMode) {
-			SetViewMode(viewModeList.IndexOf(ViewMode.Birdseye));
-		}
-	}
-
 	// called when the instance enters the scene
 	void Awake() {
 		if (Instance == null) {	
@@ -290,9 +277,13 @@ public class CamController : MonoBehaviour {
 	}
 	
 	void OrbitUpdate() {
-		
-		Vector3 targetPosition = area.bounds.center;
-		Ray ray = new Ray(area.bounds.center, _3rdPersonDir);
+        Vector3 targetPosition;
+
+        if (Simulation.robotSelected == null)
+            targetPosition = area.bounds.center;
+        else
+            targetPosition = Simulation.robotSelected.bounds.center;
+        Ray ray = new Ray(area.bounds.center, _3rdPersonDir);
 		RaycastHit hit;
 			targetPosition = area.bounds.center + _3rdPersonDir * _3rdPersonDist;
 		_camera.transform.position = Vector3.Slerp(

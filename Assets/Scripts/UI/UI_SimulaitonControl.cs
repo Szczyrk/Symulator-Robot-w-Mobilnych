@@ -4,10 +4,12 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class UI_SimulaitonControl : MonoBehaviour
 {
     public TMP_Dropdown dropdown;
+    public Toggle toggle;
 
     public void Pause()
     {
@@ -17,7 +19,7 @@ public class UI_SimulaitonControl : MonoBehaviour
     {
         foreach (Robot robot in Simulation.robots)
         {
-            if(robot != null)
+
                 robot.initializationCode();
         }
         Simulation.Run();
@@ -27,6 +29,7 @@ public class UI_SimulaitonControl : MonoBehaviour
         foreach(Robot robot in Simulation.robots)
         {
             robot.Reset();
+            robot.GetComponent<Rigidbody>().isKinematic = false;
         }
     }
 
@@ -65,5 +68,25 @@ public class UI_SimulaitonControl : MonoBehaviour
                     Orbit();
                     break;
             }
+    }
+
+    public void ToggleDrawDebug()
+    {
+        if(!toggle.isOn)
+        {
+           foreach(Robot robot in Simulation.robots)
+                foreach (ParamSensor sensor in robot.sensors)
+                {
+                    sensor.drawDebug = false;
+                }
+        }
+        else
+        {
+            foreach (Robot robot in Simulation.robots)
+                foreach (ParamSensor sensor in robot.sensors)
+                {
+                    sensor.drawDebug = true;
+                }
+        }
     }
 }

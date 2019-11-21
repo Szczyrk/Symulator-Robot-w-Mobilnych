@@ -26,13 +26,11 @@ public class Simulation : MonoBehaviour {
 		
 		public Bounds bounds {
 			get {
-				// encapsulate robot and destination
 				if (isRunning) {
 					Bounds b = new Bounds();
 					b.Encapsulate(robotSelected.position);
 					return b;
 				} 
-				// use Simulation.Instance.Bounds
 				else {
 					return Simulation.Instance.bounds;
 				}
@@ -51,18 +49,6 @@ public class Simulation : MonoBehaviour {
 
 	public static State state {get; private set;}
 
-	public static bool exhibitionMode;  
-	
-
-	public static int simulationNumber {
-		get; private set;
-	}
-	
-
-	public static int testNumber {
-		get; private set;
-	}
-	
 
 	public static Robot robotSelected {
 		get { return _robotSelected; }
@@ -102,13 +88,6 @@ public class Simulation : MonoBehaviour {
 		get { return state == State.simulating; }
 	}
 
-	public static bool isStopped {
-		get { return state == State.stopped; }
-	}
-
-	public static bool isFinished {
-		get { return state == State.end; }
-	}
 
 	
 
@@ -121,14 +100,6 @@ public class Simulation : MonoBehaviour {
 		}
 	}
 
-
-	public static float time {
-		get {
-			if (isRunning) _stopTime = Time.time;
-			return _stopTime - _startTime;
-		}
-	}
-
 	public static float timeScale {
 		get { return _timeScale; }
 		set {
@@ -138,9 +109,6 @@ public class Simulation : MonoBehaviour {
 			}
 		}
 	}
-
-	private static float _startTime;
-	private static float _stopTime;
 	
 	private static Robot _robotSelected;
     private static List<Robot> _robots = new List<Robot>();
@@ -182,26 +150,11 @@ public class Simulation : MonoBehaviour {
     public static void Pause() {
 		Debug.Log("Simulation Pause.");
 		if (state == State.simulating || state == State.starting) {
-			Time.timeScale = 0f;
+            Time.timeScale = 0f;
 			state = State.stopped;
 		}
 	}
 	
-	
-	
-
-	public static Vector3 RandomInBounds(Bounds b) {
-		Vector3 v = new Vector3();
-		v.x = UnityEngine.Random.Range(b.min.x, b.max.x);
-		v.y = b.max.y;
-		v.z = UnityEngine.Random.Range(b.min.z, b.max.z);
-		RaycastHit hit;
-		if (Physics.Raycast(v, Vector3.down, out hit)) {
-			v = hit.point + hit.normal* 0.25f;
-			Debug.DrawRay(v, Vector3.down, Color.white, 5f);
-		}
-		return v;
-	}
 	
 
 	
@@ -238,11 +191,6 @@ public class Simulation : MonoBehaviour {
             state = State.starting;
             buttonEdit.onClick.AddListener(EditStart);
         }
-        robots = new List<Robot>();
-     /*   foreach (Robot robot in GameObject.FindObjectsOfType<Robot>())
-        {
-            robots.Add(robot);
-        }*/
         namesRobotInSimulation = new List<string>();
         DontDestroyOnLoad(this);
 
@@ -250,10 +198,11 @@ public class Simulation : MonoBehaviour {
 
     public static void StartSimulation()
     {
-        robots.Clear();
         foreach(string robot in namesRobotInSimulation)
         {
-          robots.Add(RobotLoader.LoadRobotGameObject(robot).GetComponent<Robot>());
+          Robot robotList = RobotLoader.LoadRobotGameObject(robot).GetComponent<Robot>();
+            if (!robots.Contains(robotList))
+                robots.Add(robotList);
 
         }
         if(_environment != null)
@@ -304,25 +253,11 @@ public class Simulation : MonoBehaviour {
             }
         }
         if (isRunning) {
-           
-            // check for conditions to end the test
-            /*	if (robot.atDestination ) {
-                    Debug.Log("Simulation: nav objective complete!");
-                    NextTest();
-                }
-                 if (robot.isStuck && settings.continueOnRobotIsStuck) {
-                    Debug.LogWarning("Simulation: Robot appears to be stuck! Skipping test.");
-                    NextTest();
-                }
-                else if (settings.maximumTestTime > 0 && time > settings.maximumTestTime) {
-                    Debug.LogWarning("Simulation: Max test time exceeded! Skipping test.");
-                    NextTest();
-                }*/
+          
 
         }
         if (state == State.starting)
         {
-           // this.gameObject.AddComponent<IndividualEdit>();
             if (CheckRobots())
                 Pause();
         } 
@@ -346,8 +281,5 @@ public class Simulation : MonoBehaviour {
         return true;
     }
 
-    void OnDrawGizmos() {
-		Gizmos.DrawWireCube(bounds.center, bounds.size);
-	}
-	
+
 }

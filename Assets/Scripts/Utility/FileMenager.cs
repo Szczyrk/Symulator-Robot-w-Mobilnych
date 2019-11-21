@@ -138,6 +138,8 @@ public class FileMenager : MonoBehaviour
                 AddComponentFromEnvironments(instanceRoot);
             else
                 AddComponentFromRobots(instanceRoot);
+            foreach (Camera camera in instanceRoot.GetComponentsInChildren<Camera>())
+                camera.enabled = false;
             //var variantRoot = PrefabUtility.SaveAsPrefabAssetAndConnect(instanceRoot, PrefabFolderPath + Path.DirectorySeparatorChar + fileName + ".prefab", InteractionMode.UserAction);
             PrefabUtility.SaveAsPrefabAsset(instanceRoot, PrefabFolderPath + Path.DirectorySeparatorChar + fileName + ".prefab");
 

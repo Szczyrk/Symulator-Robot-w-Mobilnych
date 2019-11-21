@@ -1,12 +1,10 @@
 using System;  
-using UnityEngine; 
- public class Code : MonoBehaviour 
- { 
- public static void Main() 
- {     
-    if (Body1 8 && Body1 9)    {              
-    Body1 21 = 20;          
-     Body1 23=20;         }          
-     else         {              
-     Body1 21 = 20;              
-     Body1 23 = -20;     }  }  }
+using UnityEngine;  
+public class Code : MonoBehaviour  {  
+public static void Main()  {         
+if (Body1 8 && Body1 9)          {              
+Body1 21 = 20;              
+ Body1 23=20;         }          
+else         {             
+ Body1 21 = -20;             
+ Body1 23 = 20;          }  }  }

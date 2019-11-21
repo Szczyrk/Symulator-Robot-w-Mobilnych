@@ -1,0 +1,21 @@
+using System;  
+using UnityEngine;  
+using System.Collections;
+
+public class Code : MonoBehaviour  {  
+public static void Main()  { 
+StartCoroutine(UpdateData(Body1 17, Body1 5, Body1 6));        
+ }  
+
+	private IEnumerator UpdateData(bool Body3, float Body2, float Body1) {
+		
+if (Body3)          {              
+Body1 = 20;              
+ Body2=20;         }          
+else         {             
+ Body1 = 20;             
+ Body2 = -20;          } 
+
+			yield return new WaitForSeconds(0.1);
+	
+	}}

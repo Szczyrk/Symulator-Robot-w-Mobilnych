@@ -19,13 +19,20 @@ public class Compiler : MonoBehaviour
 
     public void button1_Click()
     {
+        Simulation.robotSelected.UnInitializationCode();
         CSharpCodeProvider codeProvider = new CSharpCodeProvider();
         Simulation.robotSelected.nameWithoutSpace = 
             codeProvider.CreateValidIdentifier(Simulation.robotSelected.nameWithoutSpace);
         ICodeCompiler icc = codeProvider.CreateCompiler();
-        string Output = Simulation.robotSelected.nameWithoutSpace + ".dll";
+        string Output = Simulation.robotSelected.nameWithoutSpace;
         string OutputCSCode = Simulation.robotSelected.nameWithoutSpace + ".txt";
-
+        if (!Output.Contains("fasdfth"))
+            Output += "fasdfth";
+        else Output = Output.Replace("fasdfth", "");
+        Simulation.robotSelected.nameWithoutSpace = Output;
+        Output += ".dll";
+        if (File.Exists(Output))
+            File.Delete(Output);
         textError.text = "";
         System.CodeDom.Compiler.CompilerParameters parameters = new CompilerParameters();
         parameters.GenerateExecutable = false;

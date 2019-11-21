@@ -26,20 +26,21 @@ public class IndividualEdit : MonoBehaviour
     CultureInfo ci = (CultureInfo)CultureInfo.CurrentCulture.Clone();
     public static GameObject editPanel;
     public static GameObject inputCode;
+    public static GameObject simulationControler;
 
     void Start()
     {
-        buttonMotor = GameObject.Find("Canvas/buttonMotor").GetComponent<Button>();
-        buttonSensorParam = GameObject.Find("Canvas/buttonSensorParam").GetComponent<Button>();
-        editPanel = GameObject.Find("Canvas/Scroll View_EditPanel");
-        listElemnetsRobot= GameObject.Find("Canvas/Scroll View_Elements robot");
-        inputCode =  GameObject.Find("Canvas/InputField_Imag");
+        buttonMotor = GameObject.Find("Canvas/PanelMain/PanelCenter/buttonMotor").GetComponent<Button>();
+        buttonSensorParam = GameObject.Find("Canvas/PanelMain/PanelCenter/buttonSensorParam").GetComponent<Button>();
+        editPanel = GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_Edit");
+        listElemnetsRobot= GameObject.Find("Canvas/PanelMain/RightPanel/Panel/Scroll View_Elements robot");
+        inputCode =  GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_InputField");
+        simulationControler = GameObject.Find("Canvas/PanelMain/RightPanel/Panel/Panel_Simulation");
         buttonMotor.gameObject.SetActive(false);
         buttonSensorParam.gameObject.SetActive(false);
         buttonSensorParam.onClick.AddListener(AddSensorParam);
         buttonMotor.onClick.AddListener(AddMotor);
         materialStatic = material;
-        editPanel.SetActive(false);
         listElemnetsRobot.SetActive(false);
        // EditPanel.SetActive(false);
         /*
@@ -109,6 +110,8 @@ public class IndividualEdit : MonoBehaviour
         }
         objectEdit.GetComponent<Rigidbody>().useGravity = false;
         objectEdit.SetActive(true);
+        objectEdit.transform.rotation = Quaternion.Euler(0,90,0);
+        simulationControler.SetActive(false);
         objectEdited = objectEdit;
         AutomaticEditPanel_UI.Start_UI();
         CamController.SetViewMode(CamController.ViewMode.Orbit);
@@ -124,6 +127,7 @@ public class IndividualEdit : MonoBehaviour
         inputCode.SetActive(true);
         editPanel.SetActive(false);
         listElemnetsRobot.SetActive(false);
+        simulationControler.SetActive(true);
         objectEdited.GetComponent<Rigidbody>().useGravity = true;
     }
     void AddMotor()
@@ -132,7 +136,7 @@ public class IndividualEdit : MonoBehaviour
         {
             motorEdit = oldGameObject.gameObject.AddComponent<MotorToWheel>();
             Simulation.robotSelected.UpdateEquipment();
-            motorEdit.GetComponent<WheelCollider>().radius = oldGameObject.bounds.size.x/oldGameObject.transform.lossyScale.x + 0.013f/ oldGameObject.transform.lossyScale.x;
+            motorEdit.GetComponent<WheelCollider>().radius = (oldGameObject.bounds.size.x + 0.014f)/2 / oldGameObject.transform.lossyScale.x;
             motorEdit.GetComponent<WheelCollider>().center = Rotation((oldGameObject.transform.position - oldGameObject.bounds.center)) / oldGameObject.transform.lossyScale.x;
             AutomaticEditPanel_UI.Start_UI();
         }
@@ -148,7 +152,8 @@ public class IndividualEdit : MonoBehaviour
     {
         if (newGameObject)
         {
-            newGameObject.gameObject.AddComponent<ParamSensor>();
+            ParamSensor sensor = newGameObject.gameObject.AddComponent<ParamSensor>();
+            sensor.CreatStartLight();
             Simulation.robotSelected.UpdateEquipment();
             AutomaticEditPanel_UI.Start_UI();
         }

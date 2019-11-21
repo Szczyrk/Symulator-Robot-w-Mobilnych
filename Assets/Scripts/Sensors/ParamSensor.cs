@@ -3,8 +3,9 @@ using System.Collections;
 
 public class ParamSensor : Sensor {
 
+    public bool drawDebug;
 
-	public float FOV = 20f;
+    public float FOV = 20f;
 
 	public float maxRange = 20f;
 	
@@ -12,14 +13,17 @@ public class ParamSensor : Sensor {
 
     public Transform startLight;
 	
-	void Start()
+	public void CreatStartLight()
     {
         if (startLight == null)
         {
             startLight = new GameObject().transform;
             startLight.name = "Start Light";
             startLight.SetParent(this.transform);
-            startLight.localPosition = new Vector3(-0.00000001f,0,0);
+            MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
+            // startLight.localPosition = meshRenderer.bounds.center - transform.position;
+            startLight.localPosition = new Vector3(0, 0.0015f, 0);
+            //startLight.localRotation = Quaternion.Euler(0,0,0);
 
         }
     }
@@ -45,7 +49,7 @@ public class ParamSensor : Sensor {
 			float proximity = maxRange;
             for (float a = -FOV; a < FOV; a += 2f)
             {
-                Quaternion rotation = Quaternion.Euler(new Vector3(0,a,0));
+                Quaternion rotation = Quaternion.Euler(new Vector3(0, a, 0));
 				Vector3 direction = rotation * startLight.forward;
 				float check = Cast (direction);
 				if (check < proximity) proximity = check;
@@ -61,13 +65,23 @@ public class ParamSensor : Sensor {
 	private float Cast(Vector3 direction) {
 		Ray ray = new Ray(startLight.position, direction);
 		RaycastHit hit;
-		if (Physics.Raycast(ray, out hit, maxRange)) {
-			return hit.distance;
-		}
-		else  {
-			return maxRange;
-		}
-	}
+        if (Physics.Raycast(ray, out hit, maxRange))
+        {
+            if (drawDebug) Draw.Instance.Line(
+                transform.position,
+                hit.point,
+                Color.red);
+            return hit.distance;
+        }
+        else
+        {
+            if (drawDebug) Draw.Instance.Line(
+        transform.position,
+        transform.position + direction * maxRange,
+        Color.green);
+            return maxRange;
+        }
+    }
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
