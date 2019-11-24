@@ -22,6 +22,11 @@ public class AddElementsToList : MonoBehaviour
         if(listPanel == null)
             listPanel = GameObject.Find("Canvas/PanelMain/RightPanel/Panel/Scroll View_Elements robot/Viewport/Content");
         button.gameObject.SetActive(true);
+        foreach (Transform child in listPanel.transform)
+        {
+            if(child != button)
+                GameObject.Destroy(child.gameObject);
+        }
         var elements = robot.GetComponentsInChildren<MeshRenderer>();
         foreach (MeshRenderer meshRenderer in elements)
         {

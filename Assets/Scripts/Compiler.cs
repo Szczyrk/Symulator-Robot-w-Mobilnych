@@ -16,23 +16,30 @@ public class Compiler : MonoBehaviour
 {
    public TextMeshProUGUI textError;
     public InputField textCode;
+    public static Compiler instance;
+    List<string> patchsToDelete = new List<string>();
+
+    void OnDestroy()
+    {
+        foreach (String s in patchsToDelete)
+            if (File.Exists(s))
+                File.Delete(s);
+    }
+    void Awake()
+    {
+        instance = this;
+    }
 
     public void button1_Click()
     {
-        Simulation.robotSelected.UnInitializationCode();
+        Robot robot =   Simulation.robotSelected;
+       robot.UnInitializationCode();
         CSharpCodeProvider codeProvider = new CSharpCodeProvider();
-        Simulation.robotSelected.nameWithoutSpace = 
-            codeProvider.CreateValidIdentifier(Simulation.robotSelected.nameWithoutSpace);
+       robot.nameWithoutSpace = 
+            codeProvider.CreateValidIdentifier(robot.nameWithoutSpace);
         ICodeCompiler icc = codeProvider.CreateCompiler();
-        string Output = Simulation.robotSelected.nameWithoutSpace;
-        string OutputCSCode = Simulation.robotSelected.nameWithoutSpace + ".txt";
-        if (!Output.Contains("fasdfth"))
-            Output += "fasdfth";
-        else Output = Output.Replace("fasdfth", "");
-        Simulation.robotSelected.nameWithoutSpace = Output;
-        Output += ".dll";
-        if (File.Exists(Output))
-            File.Delete(Output);
+        string Output =robot.nameWithoutSpace+ ".dll";
+        string OutputCSCode =robot.code + ".txt";
         textError.text = "";
         System.CodeDom.Compiler.CompilerParameters parameters = new CompilerParameters();
         parameters.GenerateExecutable = false;
@@ -43,7 +50,7 @@ public class Compiler : MonoBehaviour
         parameters.ReferencedAssemblies.Add(typeof(MonoBehaviour).Assembly.Location);
         parameters.OutputAssembly = Output;
         System.IO.File.WriteAllText(OutputCSCode, textCode.text);
-        string code = RenameVariables(textCode.text);
+        string code = RenameVariables(textCode.text, robot);
         CompilerResults results = icc.CompileAssemblyFromSource(parameters, code);
         if (results.Errors.Count > 0)
         {
@@ -59,20 +66,30 @@ public class Compiler : MonoBehaviour
         }
         else
         {
+           robot.initializationCode();
+            int count = 1;
+            string tempFileName = robot.nameWithoutSpace;
+            patchsToDelete.Add(Output);
+            while (File.Exists(Output))
+            {
+                tempFileName = string.Format("{0}_{1}", robot.code, count++);
+                Output = tempFileName + ".dll";
+            }
+            robot.nameWithoutSpace = tempFileName;
             textError.faceColor = Color.blue;
             textError.text = "Success!";
         }
     }
 
-    private string RenameVariables(string text)
+    private string RenameVariables(string text, Robot robot)
     {
-        if(!Simulation.robotSelected)
+        if(!robot)
             return text;
-        text = text.Replace("Code", Simulation.robotSelected.nameWithoutSpace);
+        text = text.Replace("Code",robot.nameWithoutSpace);
         text = text.Replace("void Main()", "void Main(Robot robot)");
-        for (int i =0; i < Simulation.robotSelected.motors.Length;i++)
+        for (int i =0; i <robot.motors.Length;i++)
             text = text.Replace(Simulation.robotSelected.motors[i].name, "robot.motors["+i+"].powerMotor");
-        for (int i = 0; i < Simulation.robotSelected.sensors.Length; i++)
+        for (int i = 0; i <robot.sensors.Length; i++)
             text = text.Replace(Simulation.robotSelected.sensors[i].name, "robot.sensors[" + i + "].detected");
         return text;
             

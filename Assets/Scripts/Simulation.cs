@@ -7,7 +7,7 @@ using UnityEngine.Events;
 
 public class Simulation : MonoBehaviour {
 
-    private static Button buttonEdit;
+
     public enum State {
         menu,
 		starting,
@@ -47,7 +47,7 @@ public class Simulation : MonoBehaviour {
 	public static Simulation Instance;
 	
 
-	public static State state {get; private set;}
+	public static State state {get; set;}
 
 
 	public static Robot robotSelected {
@@ -130,10 +130,6 @@ public class Simulation : MonoBehaviour {
 		if (state == State.stopped || state == State.starting) {
 			Time.timeScale = _timeScale;
 			state = State.simulating;
-            foreach (Robot robot in robots)
-            {
-                robot.StartSensor();
-            }
 		}
 	}
 
@@ -185,12 +181,6 @@ public class Simulation : MonoBehaviour {
 	void Start()
     {
         state = State.menu;
-        if (GameObject.Find("buttonEdit"))
-        {
-            buttonEdit = GameObject.Find("buttonEdit").GetComponent<Button>();
-            state = State.starting;
-            buttonEdit.onClick.AddListener(EditStart);
-        }
         namesRobotInSimulation = new List<string>();
         DontDestroyOnLoad(this);
 
@@ -207,30 +197,11 @@ public class Simulation : MonoBehaviour {
         }
         if(_environment != null)
             environment.transform.Spawn();
-        if (buttonEdit == null)
-        {
-            buttonEdit = GameObject.Find("Canvas/Panel/buttonEdit").GetComponent<Button>();
-            buttonEdit.onClick.AddListener(EditStart);
-        }
         if(robots.Count == 0)
             robotSelected = robots[0];
     }
 
-    private static void EditStart()
-    {
-        if(robotSelected != null)
-            if (state != State.edit)
-            {
-                state = State.edit;
-                IndividualEdit.StartIndividualEdit(robotSelected.gameObject);
-            }
-            else
-            {
-                state = State.starting;
-                IndividualEdit.BackToSimulation();
-                robotSelected.ShowVariables();
-            }
-    }
+   
 
     void Update() {
         if (Input.GetMouseButtonDown(0) && state != State.edit)
@@ -243,18 +214,14 @@ public class Simulation : MonoBehaviour {
                 if (hitInfo.transform.GetComponentInParent<Robot>())
                 {
                     Robot robot = hitInfo.transform.GetComponentInParent<Robot>();
-                    if(robot != robotSelected)
+                    if (robot != robotSelected)
                     {
                         robotSelected = robot;
-                        Debug.Log("Robot selected: " +robotSelected.name);
+                        Debug.Log("Robot selected: " + robotSelected.name);
                         robotSelected.ShowVariables();
                     }
                 }
             }
-        }
-        if (isRunning) {
-          
-
         }
         if (state == State.starting)
         {
@@ -268,15 +235,17 @@ public class Simulation : MonoBehaviour {
     {
         foreach(Robot robot in _robots)
         {
+            Simulation.robotSelected = robot;
             if (robot.motors.Length == 0)
             {
                 Pause();
                 state = State.edit;
-                Simulation.robotSelected = robot;
                 IndividualEdit.StartIndividualEdit(robot.gameObject);
                 robotSelected = robot;
                 return false;
             }
+            robot.ShowVariables();
+            robot.StartingRobot();
         }
         return true;
     }

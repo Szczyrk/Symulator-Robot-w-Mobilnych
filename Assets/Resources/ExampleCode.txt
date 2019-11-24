@@ -1,11 +1,19 @@
 using System;
-using UnityEngine;
-public class Code : MonoBehaviour {
-public static void Main(){         
-if ([bool sensor]){
-[float motor1]=[value(-20:20)];
-[float motor2]=[value(-20:20)];}
-else{
-[float motor1]=[value(-20:20)];
-[float motor2]=[value(-20:20)];}
+using System.Threading;
+using UnityEngine;  
+using System.Collections;
+
+public class Code : MonoBehaviour  {  
+public static void Main()
+{
+	while(true)
+	{
+		if ([bool sensor]){
+		[float motor1]=[value(-20:20)];
+		[float motor2]=[value(-20:20)];}
+	else{
+		[float motor1]=[value(-20:20)];
+		[float motor2]=[value(-20:20)];}
+	Thread.Sleep(500);
+   }
 }}

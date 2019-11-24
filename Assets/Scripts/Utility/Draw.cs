@@ -58,12 +58,12 @@ public class Draw : MonoBehaviour {
 		}
 		gl_lines.Add(new LineData(start, end, color));
 	}
-    public void AddCircle(MotorToWheel wheel)
+    public void AddCircle(MotorController wheel)
     {
         if (wheel != null)
         {
             gl_circle.Add(
-                new Circle(wheel.transform.position + wheel.wheelCollider.center, 
+                new Circle(wheel.transform.position + wheel.centerWheel, 
                 Color.green, wheel.wheelCollider.radius * wheel.transform.lossyScale.x));
         }
 

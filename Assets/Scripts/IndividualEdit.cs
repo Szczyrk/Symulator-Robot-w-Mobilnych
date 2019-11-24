@@ -8,30 +8,35 @@ using System;
 
 public class IndividualEdit : MonoBehaviour
 {
+    static IndividualEdit instance;
     static List<GameObject> gameobjectsActive = new List<GameObject>();
     public Material material;
     static Material materialStatic;
     private static Material oldMaterial;
     static MeshRenderer oldGameObject = null;
     static MeshRenderer newGameObject;
-    private Button buttonMotor;
-    private Button buttonSensorParam;
+    static private Button buttonMotor;
+    static private Button buttonSensorParam;
     static GameObject objectEdited;
     static GameObject listElemnetsRobot;
     //static GameObject panelMotor;
     Button accept;
-    MotorToWheel motorEdit;
+    MotorController motorEdit;
     TextMeshProUGUI text_Torque;
     TextMeshProUGUI text_RPM;
     CultureInfo ci = (CultureInfo)CultureInfo.CurrentCulture.Clone();
     public static GameObject editPanel;
     public static GameObject inputCode;
     public static GameObject simulationControler;
+    void Awake()
+    {
+        instance = this;
+    }
 
     void Start()
     {
-        buttonMotor = GameObject.Find("Canvas/PanelMain/PanelCenter/buttonMotor").GetComponent<Button>();
-        buttonSensorParam = GameObject.Find("Canvas/PanelMain/PanelCenter/buttonSensorParam").GetComponent<Button>();
+        buttonMotor = GameObject.Find("Canvas/PanelMain/PanelCenter/Panel/buttonMotor").GetComponent<Button>();
+        buttonSensorParam = GameObject.Find("Canvas/PanelMain/PanelCenter/Panel/buttonSensorParam").GetComponent<Button>();
         editPanel = GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_Edit");
         listElemnetsRobot= GameObject.Find("Canvas/PanelMain/RightPanel/Panel/Scroll View_Elements robot");
         inputCode =  GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_InputField");
@@ -66,18 +71,22 @@ public class IndividualEdit : MonoBehaviour
                 newGameObject = hitInfo.collider.transform.GetComponent<MeshRenderer>();
                 if (newGameObject != oldGameObject)
                 {
-                    if (oldGameObject)
-                        oldGameObject.sharedMaterial = oldMaterial;
-                    oldGameObject = newGameObject;
-                    Debug.Log("Hit " + hitInfo.collider.name+" " + newGameObject);
-                    oldMaterial = newGameObject.sharedMaterial;
-                    newGameObject.sharedMaterial = material;
+                    if (newGameObject != null)
+                    {
+                        if (oldGameObject)
+                            oldGameObject.sharedMaterial = oldMaterial;
+                        oldGameObject = newGameObject;
+                        Debug.Log("Hit " + hitInfo.collider.name + " " + newGameObject);
+                        oldMaterial = newGameObject.sharedMaterial;
+                        newGameObject.sharedMaterial = material;
+                    }
                 }
             }
             else
             {
                 if (oldGameObject)
                     oldGameObject.sharedMaterial = oldMaterial;
+                oldGameObject = null;
                 Debug.Log("No hit!");
                 buttonMotor.gameObject.SetActive(false);
                 buttonSensorParam.gameObject.SetActive(false);
@@ -100,7 +109,8 @@ public class IndividualEdit : MonoBehaviour
         foreach (GameObject objectInScene in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
         {
             if (objectInScene.GetComponent<Camera>() || objectInScene.GetComponent<Light>() || objectInScene.GetComponent<Canvas>() 
-                || objectInScene.name == "EventSystem" || objectInScene.GetComponent<UI_SimulaitonControl>())
+                || objectInScene.name == "EventSystem" || objectInScene.name == "StopBox" || objectInScene.GetComponent<UI_SimulaitonControl>()
+                || objectEdit == objectInScene)
                 continue;
             if (objectInScene.active)
             {
@@ -108,14 +118,21 @@ public class IndividualEdit : MonoBehaviour
                 objectInScene.SetActive(false);
             }
         }
-        objectEdit.GetComponent<Rigidbody>().useGravity = false;
-        objectEdit.SetActive(true);
-        objectEdit.transform.rotation = Quaternion.Euler(0,90,0);
+        objectEdit.transform.rotation = Quaternion.Euler(0, 90, 0);
+        objectEdit.GetComponent<Rigidbody>().isKinematic = true;
+        Time.timeScale = 1f;
+        instance.StartCoroutine("Coroutine");
         simulationControler.SetActive(false);
         objectEdited = objectEdit;
         AutomaticEditPanel_UI.Start_UI();
         CamController.SetViewMode(CamController.ViewMode.Orbit);
-       // EditPanel.SetActive(true);
+        // EditPanel.SetActive(true);
+    }
+
+    private IEnumerator Coroutine()
+    {
+        yield return new WaitForSeconds(0.5f);
+        Time.timeScale = 0f;
     }
     public static void BackToSimulation()
     {
@@ -128,31 +145,31 @@ public class IndividualEdit : MonoBehaviour
         editPanel.SetActive(false);
         listElemnetsRobot.SetActive(false);
         simulationControler.SetActive(true);
-        objectEdited.GetComponent<Rigidbody>().useGravity = true;
+        buttonMotor.gameObject.SetActive(false);
+        buttonSensorParam.gameObject.SetActive(false);
+
+        objectEdited.GetComponent<Rigidbody>().isKinematic = false;
     }
     void AddMotor()
     {
-        if(oldGameObject)
+        if(newGameObject)
         {
-            motorEdit = oldGameObject.gameObject.AddComponent<MotorToWheel>();
+            motorEdit = newGameObject.gameObject.AddComponent<MotorController>();
+            motorEdit.CreatMotor(newGameObject);
+            newGameObject.GetComponent<MeshCollider>().enabled = false;
+
+
             Simulation.robotSelected.UpdateEquipment();
-            motorEdit.GetComponent<WheelCollider>().radius = (oldGameObject.bounds.size.x + 0.014f)/2 / oldGameObject.transform.lossyScale.x;
-            motorEdit.GetComponent<WheelCollider>().center = Rotation((oldGameObject.transform.position - oldGameObject.bounds.center)) / oldGameObject.transform.lossyScale.x;
             AutomaticEditPanel_UI.Start_UI();
         }
     }
 
-    private Vector3 Rotation(Vector3 vector3)
-    {
-        Matrix4x4 M = Matrix4x4.TRS(Vector3.one, oldGameObject.transform.rotation, Vector3.one);
-        return M.inverse * vector3*-1;
-    }
 
     void AddSensorParam()
     {
         if (newGameObject)
         {
-            ParamSensor sensor = newGameObject.gameObject.AddComponent<ParamSensor>();
+            DistanceSensorController sensor = newGameObject.gameObject.AddComponent<DistanceSensorController>();
             sensor.CreatStartLight();
             Simulation.robotSelected.UpdateEquipment();
             AutomaticEditPanel_UI.Start_UI();

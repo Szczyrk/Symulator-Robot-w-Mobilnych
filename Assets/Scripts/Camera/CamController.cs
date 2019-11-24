@@ -53,10 +53,6 @@ public class CamController : MonoBehaviour {
 		}
 	}
 
-	public static ReadOnlyCollection<ViewMode> viewModeList {
-		get { return _modes.AsReadOnly(); }
-	}
-	
 	private static List<ViewMode>		_modes;		
 	private static List<IObjectDimensions>	_areas;		
 	private static IObjectDimensions			_stub;		
@@ -78,54 +74,11 @@ public class CamController : MonoBehaviour {
 		if (!_areas.Contains(area)) _areas.Add(area);
 	}
 	
-
-	public static void RemoveAreaOfInterest(IObjectDimensions area) {
-		if (_areas.Count > 1) _areas.Remove(area);
-		if (_area >= _areas.Count) _area = 0;
-	}
-
-	public static void ClearAreaList() {
-		_areas.Clear();
-		_area = 0;
-	}
-
-	public static void SetAreaOfInterest(int index) {
-		// ignore out of range indexes
-		if (index < 0 || index >= _areas.Count) {
-			Debug.LogWarning("SetAreaOfInterest index param out of range. Ignoring.");
-			return;
-		}
-		_area = index;
-	}
-	
-
-	public static void SetAreaOfInterest(IObjectDimensions obj) {
-		int index = _areas.IndexOf(obj);
-		if (index >= 0) _area = index;
-	}
-
-	public static void CycleAreaOfInterest() {
-		_area = (++_area) % _areas.Count;
-	}
-	
-	
 	
 	public static void AddViewMode(ViewMode mode) {
 		if (!_modes.Contains(mode)) _modes.Add(mode);
 	}
-	
-	public static void RemoveViewMode(ViewMode mode) {
-		if (mode != ViewMode.FreeMovement) _modes.Remove(mode);
-		if (_mode > _modes.Count) {
-			SetViewMode(0);
-		}
-	}
 
-	public static void ClearViewModeList() {
-		_modes.Clear();
-		_modes.Add(ViewMode.Orbit);
-		SetViewMode(0);
-	}
 	
 	public static void SetViewMode(ViewMode mode) {
 		int index = _modes.IndexOf(mode);
@@ -133,9 +86,8 @@ public class CamController : MonoBehaviour {
 	}
 	
 	public static void SetViewMode(int index) {
-		// ignore out of range indexes
 		if (index < 0 || index >= _modes.Count) {
-			Debug.LogWarning("SetViewMode index param out of range. Ignoring.");
+			Debug.LogWarning("SetViewMode index param out of range.");
 			return;
 		}
 		_mode = index;
@@ -153,11 +105,7 @@ public class CamController : MonoBehaviour {
 			break;
 		}
 	}
-	
 
-	public static void RandomViewMode() {
-		SetViewMode(Random.Range(0, _modes.Count-1));
-	}
 	
 
 
@@ -169,16 +117,11 @@ public class CamController : MonoBehaviour {
 
 	public float freeMoveSpeedShiftMult;
 	
-
-	
-	
-	private float _birdseyeDist = 0f;				// vertical distance offset for camera in birdseye mode
-	private float _3rdPersonDist = 0.5f;			// distance offset for camera in orbit mode
-	private Vector3 _3rdPersonDir = Vector3.one;	// direction offset for camera in orbit mode
-	private Vector3 _1stPersonDir = Vector3.one;	// camera direction when in free movement mode
+	private float birdseyeScroll = 0f;
+	private float orbitScroll = 0.5f;
+	private Vector3 _1stPersonDir = Vector3.one;
 	
 
-	// called when the instance enters the scene
 	void Awake() {
 		if (Instance == null) {	
 			Instance = this;
@@ -189,34 +132,28 @@ public class CamController : MonoBehaviour {
 		_camera = GetComponent<Camera>();
 	}
 	
-	// called on the first frame for this instance 
 	void Start() {
 		SetViewMode(0);
 	}
 	
-	// called every frame for this instance
+
 	void Update() {
 		
-		// set camera size on screen
 		GetComponent<Camera>().rect = new Rect(0, 0, 1f, 1f);
 		
 
 		if ( GetComponent<Camera>().pixelRect.Contains(Input.mousePosition) ) {
 
-			_birdseyeDist -= Input.GetAxis("Mouse ScrollWheel") * 1.2f;
-			_3rdPersonDist -= Input.GetAxis("Mouse ScrollWheel") * 1.2f;
-			_3rdPersonDist = Mathf.Min(_3rdPersonDist, 20f);
-			_3rdPersonDist = Mathf.Max(_3rdPersonDist, 0.15f);
+			birdseyeScroll -= Input.GetAxis("Mouse ScrollWheel") * 1.2f;
+			orbitScroll -= Input.GetAxis("Mouse ScrollWheel") * 1.2f;
+			orbitScroll = Mathf.Min(orbitScroll, 20f);
+			orbitScroll = Mathf.Max(orbitScroll, 0.15f);
 			
 			if (Input.GetMouseButton(1)) {
 				float x = Input.GetAxisRaw("Mouse Y") * mouseSensitivity;
 				float y = Input.GetAxisRaw("Mouse X") * mouseSensitivity;
-				Quaternion rotation = Quaternion.AngleAxis(-y, Vector3.up);
-				_3rdPersonDir = rotation * _3rdPersonDir;
-				rotation = Quaternion.AngleAxis(x, _camera.transform.right);
-				_3rdPersonDir = rotation * _3rdPersonDir;
-				
-				rotation = Quaternion.AngleAxis(y, Vector3.up);
+
+                Quaternion rotation = Quaternion.AngleAxis(y, Vector3.up);
 				_1stPersonDir = rotation * _1stPersonDir;
 				rotation = Quaternion.AngleAxis(-x, _camera.transform.right);
 				_1stPersonDir = rotation * _1stPersonDir;
@@ -241,12 +178,25 @@ public class CamController : MonoBehaviour {
 	
 
 	void BirdseyeUpdate() {
-		
-		float size = Mathf.Max(area.bounds.size.x/2f, area.bounds.size.z/2f);
-		size += _birdseyeDist;
+
+        Vector3 targetPosition;
+        Quaternion targetRotation = Quaternion.LookRotation(Vector3.down);
+        float size;
+        if (Simulation.robotSelected == null)
+        {
+            targetPosition = area.bounds.center + Vector3.up * 10f;
+            size = Mathf.Max(area.bounds.size.x / 2f, area.bounds.size.z / 2f);
+        }
+        else
+        {
+            targetPosition = Simulation.robotSelected.bounds.center + Vector3.up * 10f;
+            size = Mathf.Max(Simulation.robotSelected.bounds.size.x / 2f, Simulation.robotSelected.bounds.size.z / 2f);
+        }
+      
+		size += birdseyeScroll;
 		size = Mathf.Max(size, 0.5f);
 		_camera.orthographicSize = Mathf.Lerp(_camera.orthographicSize, size, Time.unscaledDeltaTime * 4f);
-		Vector3 targetPosition = area.bounds.center + Vector3.up * 10f;
+		
 		
 
 		_camera.transform.position = Vector3.Slerp(
@@ -254,9 +204,7 @@ public class CamController : MonoBehaviour {
 			targetPosition, 
 			Time.unscaledDeltaTime * 4f
 			);
-		
 
-		Quaternion targetRotation = Quaternion.LookRotation(Vector3.down);
 		_camera.transform.rotation = Quaternion.Slerp(
 			_camera.transform.rotation, 
 			targetRotation, 
@@ -278,14 +226,18 @@ public class CamController : MonoBehaviour {
 	
 	void OrbitUpdate() {
         Vector3 targetPosition;
-
+        Quaternion targetRotation;
         if (Simulation.robotSelected == null)
-            targetPosition = area.bounds.center;
+        {
+            targetPosition = area.bounds.center + _1stPersonDir * orbitScroll;
+            targetRotation = Quaternion.LookRotation(area.bounds.center - targetPosition);
+        }
         else
-            targetPosition = Simulation.robotSelected.bounds.center;
-        Ray ray = new Ray(area.bounds.center, _3rdPersonDir);
-		RaycastHit hit;
-			targetPosition = area.bounds.center + _3rdPersonDir * _3rdPersonDist;
+        {
+            targetPosition = Simulation.robotSelected.bounds.center + _1stPersonDir * orbitScroll;
+            targetRotation = Quaternion.LookRotation(Simulation.robotSelected.bounds.center - targetPosition);
+        }
+       
 		_camera.transform.position = Vector3.Slerp(
 			_camera.transform.position, 
 			targetPosition, 
@@ -293,7 +245,7 @@ public class CamController : MonoBehaviour {
 			);
 		
 
-		Quaternion targetRotation = Quaternion.LookRotation(area.bounds.center - targetPosition);
+		
 		_camera.transform.rotation = Quaternion.Slerp(
 			_camera.transform.rotation, 
 			targetRotation, 

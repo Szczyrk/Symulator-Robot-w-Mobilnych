@@ -9,14 +9,14 @@ public class Code : MonoBehaviour  {
 while(true)
 {
 
-if (Body1 17)          {   
+if (Body1 17 || Body1 16 || Body1 15)          {
 Debug.Log("Widze");           
 Body1 5= 20;              
  Body1 6=20;         }          
 else         {             
 Debug.Log("Nie widze");
- Body1 5= 20;             
- Body1 6= -20;          } 
+ Body1 5= 0;             
+ Body1 6= 0;          } 
 
  Thread.Sleep(500);
    }

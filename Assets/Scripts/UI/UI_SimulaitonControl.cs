@@ -13,6 +13,11 @@ public class UI_SimulaitonControl : MonoBehaviour
 
     public void Pause()
     {
+        foreach (Robot robot in Simulation.robots)
+        {
+
+            robot.Stop();
+        }
         Simulation.Pause();
     }
     public void Run()
@@ -20,7 +25,7 @@ public class UI_SimulaitonControl : MonoBehaviour
         foreach (Robot robot in Simulation.robots)
         {
 
-                robot.initializationCode();
+                robot.StartRobot();
         }
         Simulation.Run();
     }
@@ -75,7 +80,7 @@ public class UI_SimulaitonControl : MonoBehaviour
         if(!toggle.isOn)
         {
            foreach(Robot robot in Simulation.robots)
-                foreach (ParamSensor sensor in robot.sensors)
+                foreach (DistanceSensorController sensor in robot.sensors)
                 {
                     sensor.drawDebug = false;
                 }
@@ -83,7 +88,7 @@ public class UI_SimulaitonControl : MonoBehaviour
         else
         {
             foreach (Robot robot in Simulation.robots)
-                foreach (ParamSensor sensor in robot.sensors)
+                foreach (DistanceSensorController sensor in robot.sensors)
                 {
                     sensor.drawDebug = true;
                 }

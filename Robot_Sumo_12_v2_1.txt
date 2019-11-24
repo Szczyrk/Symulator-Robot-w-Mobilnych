@@ -1,0 +1,24 @@
+using System;
+using System.Threading;
+using UnityEngine;  
+using System.Collections;
+
+public class Code : MonoBehaviour  {  
+   public static void Main()
+   {
+while(true)
+{
+
+if (ad sensor:1 && ad sensor:2)          {
+Debug.Log("Widze");           
+tire1 = 20;              
+tire3 =20;         }          
+else         {             
+Debug.Log("Nie widze");
+ tire1= 20;             
+ tire3= -20;          } 
+
+ Thread.Sleep(500);
+   }
+}
+}

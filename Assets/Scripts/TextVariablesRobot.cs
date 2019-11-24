@@ -25,12 +25,10 @@ public class TextVariablesRobot : MonoBehaviour
         if (GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_InputField/InputField/Text Start"))
         {
             textTMPStart = GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_InputField/InputField/Text Start").GetComponent<TMP_Text>();
-            UpdateVariables();
         }
         if (GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_InputField/InputField/InputFieldCode"))
         {
             textCode = GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_InputField/InputField/InputFieldCode").GetComponent<InputField>();
-           UpdateCode();
         }
     }
 
@@ -39,9 +37,9 @@ public class TextVariablesRobot : MonoBehaviour
         if (textCode == null)
             textCode = GameObject.Find("Canvas/PanelMain/LeftPanel/LeftPanel_InputField/InputField/InputFieldCode").GetComponent<InputField>();
         string path = "Assets/Resources/ExampleCode.txt";
-        if (File.Exists(robot.nameWithoutSpace + ".txt"))
+        if (File.Exists(robot.code + ".txt"))
         {
-            path = robot.nameWithoutSpace + ".txt";
+            path = robot.code + ".txt";
         }
         
         textCode.text = File.ReadAllText(path);
@@ -57,7 +55,7 @@ public class TextVariablesRobot : MonoBehaviour
             textTMPStart.text += "bool "+sensor.name + "\n";
         textTMPStart.text += "\n";
         textTMPStart.text += "//Motors:  \n";
-        foreach (MotorToWheel motor in robot.motors)
+        foreach (MotorController motor in robot.motors)
             textTMPStart.text += "float "+motor.name + "\n";
     }
 

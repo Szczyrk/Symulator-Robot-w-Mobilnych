@@ -17,25 +17,30 @@ public class Robot : MonoBehaviour, IObjectDimensions {
 	public Transform 	destination;	
 	public Vector3 		centerOfMassOffset;
     public string nameWithoutSpace;
+    public string code;
 
     Rigidbody rigidbody;
-    public MotorToWheel[] 	motors;
+    public MotorController[] 	motors;
     public Sensor[] sensors;
 	private Vector3 	_size;
     private MethodInfo[] methods;
-    Thread thread;
+    Thread program;
     public TextVariablesRobot textVariables;
     internal bool reload;
-    public Vector3 startPostion;
-    public Quaternion startRotation;
+    private Vector3 startPostion;
+    private Quaternion startRotation;
+
+    void OnDestroy()
+    {
+        if(program != null)
+            program.Abort();
+    }
 
     public Vector3 position {
 		get{ return transform.position; }
 		set{ transform.position = value; }
 	}
 	
-
-	public Transform cameraMount { get; private set; }
 
 	public Bounds bounds {
 		get {
@@ -66,7 +71,7 @@ public class Robot : MonoBehaviour, IObjectDimensions {
 
     public void UpdateEquipment()
     {
-        motors = GetComponentsInChildren<MotorToWheel>();
+        motors = GetComponentsInChildren<MotorController>();
         sensors = GetComponentsInChildren<Sensor>();
     }
 
@@ -75,7 +80,7 @@ public class Robot : MonoBehaviour, IObjectDimensions {
     {
         startPostion = transform.position;
         startRotation = transform.rotation;
-        motors = GetComponentsInChildren<MotorToWheel>();
+        motors = GetComponentsInChildren<MotorController>();
         sensors = GetComponentsInChildren<Sensor>();
         rigidbody = GetComponent<Rigidbody>();
         if(!Simulation.robots.Contains(this))
@@ -90,31 +95,21 @@ public class Robot : MonoBehaviour, IObjectDimensions {
         nameWithoutSpace = nameWithoutSpace.Replace("{", "");
         nameWithoutSpace = nameWithoutSpace.Replace("}", "");
         nameWithoutSpace = "Robot_" + nameWithoutSpace;
+        code = nameWithoutSpace;
     }
 
     public void initializationCode()
     {
-        /* AppDomain dom = AppDomain.CreateDomain(nameWithoutSpace);
-          AssemblyName assemblyName = new AssemblyName();
-          assemblyName.CodeBase = nameWithoutSpace + ".dll";
-          Assembly assembly = dom.Load(assemblyName);
-          Type type = assembly.GetType(nameWithoutSpace);
-          methods = type.GetMethods();
-          AppDomain.Unload(dom);*/
         if (File.Exists(nameWithoutSpace + ".dll"))
         {
             var DLL = Assembly.LoadFile(nameWithoutSpace + ".dll");
             Type type = DLL.GetType(nameWithoutSpace);
             methods = type.GetMethods();
-            Assembly.UnsafeLoadFrom(nameWithoutSpace + ".dll");
-            thread = new Thread(() =>
-            {
-                methods[0].Invoke(this, new object[] { this });
-            });
-            thread.Start();
         }
         else
         {
+            Stop();
+            StopSensor();
             Debug.Log("No code for " + name);
         }
 
@@ -125,6 +120,44 @@ public class Robot : MonoBehaviour, IObjectDimensions {
         methods = null;
     }
 
+    public void StartingRobot()
+    {
+        if (program == null)
+        {
+            if (!File.Exists(code+".txt"))
+            {
+                Debug.Log("Robot " + this.name + " has't code. Please create it!");
+            }
+            else
+                Compiler.instance.button1_Click();
+        }
+    }
+
+    public void StartRobot()
+    {
+        if (methods != null)
+        {
+            program = new Thread(() =>
+            {
+                methods[0].Invoke(this, new object[] { this });
+            });
+            StartSensor();
+            program.Start();
+        }
+        else
+            Debug.Log("Robot " + name +" hasn't got program!");
+    }
+
+    public void Stop()
+    {
+        if(program!=null)
+            program.Abort();
+        for (int i = 0; i < motors.Length; i++)
+        {
+            motors[i].powerMotor = 0;
+        }
+        StopSensor();
+    }
 
     public void StartSensor()
     {
@@ -132,14 +165,17 @@ public class Robot : MonoBehaviour, IObjectDimensions {
             sensor.Enable();
     }
 
+    public void StopSensor()
+    {
+        foreach (Sensor s in sensors)
+        {
+            s.Disable();
+        }
+    }
+
 	
 	private void Awake() {
 
-		cameraMount = transform.Find("Main Camera");
-		if (!cameraMount) {
-			cameraMount = transform;
-			Debug.LogWarning("CameraMount object not found on Robot.");
-		} 
 
 		Bounds b = new Bounds(Vector3.zero, Vector3.zero);
 		foreach(Renderer r in GetComponentsInChildren<Renderer>())
@@ -153,23 +189,15 @@ public class Robot : MonoBehaviour, IObjectDimensions {
 	private void Update() {
 
         if (manualControl) {
-			float x = Input.GetAxis("X");
-			float y = Input.GetAxis("Y");
-			float z = Input.GetAxis("Z");	
+			float stright = Input.GetAxis("X");
+			float right = Input.GetAxis("C");
+			float left = Input.GetAxis("Z");
+            Code(stright, right, left);
 
-		}
+
+        }
 		else if (Simulation.isRunning){
-
-            //Code();
-           /* if (methods != null && !thread.IsAlive)
-            {
-                
-                thread.Join();
-            }
-            else
-                Debug.Log("Robot " + name + " has no code");*/
-
-            foreach (MotorToWheel motor in motors)
+            foreach (MotorController motor in motors)
             {
                 motor.Run();
             }
@@ -181,18 +209,16 @@ public class Robot : MonoBehaviour, IObjectDimensions {
         }
     }
 
-    private void Code()
+    private void Code( float stright, float right, float left)
     {
-        Robot robot = this;
-        if (robot.sensors[0].detected && robot.sensors[1].detected)
-        {
-            robot.motors[0].powerMotor = 20;
-            robot.motors[1].powerMotor = 20;
-        }
-        else
-        {
-            robot.motors[0].powerMotor = 20;
-            robot.motors[1].powerMotor = -20;
+        foreach(MotorController motor in motors)
+            {
+            if (stright == 1)
+                motor.powerMotor = 20f;
+            if(right == 1)
+                motors[0].powerMotor = -20f;
+            else if(left == 1)
+                motors[1].powerMotor = -20f;
         }
     }
     public void UnLoadCode()

@@ -25,16 +25,5 @@ public class EnvLoader : MonoBehaviour  {
 		Debug.LogError(name + " environment not found.");
 		return null;
 	}
-	
-	public static GameObject RandomEnvironment() {
-		SearchForEnvironments();
-		int index = Random.Range(0, environmentsFound.Count);
-		return environmentsFound[index];
-	}
-	
-	public static string RandomEnvironmentName() {
-		SearchForEnvironments();
-		int index = Random.Range(0, environmentsFound.Count);
-		return environmentsFound[index].name;
-	}
+
 }
