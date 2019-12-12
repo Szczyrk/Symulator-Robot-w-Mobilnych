@@ -1,9 +1,5 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
-using System;
-using UnityEngine.UI;
-using UnityEngine.Events;
 
 public class Simulation : MonoBehaviour {
 
@@ -250,5 +246,8 @@ public class Simulation : MonoBehaviour {
         return true;
     }
 
-
+    void OnDestroy()
+    {
+        state = State.end;
+    }
 }

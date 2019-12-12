@@ -15,8 +15,8 @@ Body1 5= 20;
  Body1 6=20;         }          
 else         {             
 Debug.Log("Nie widze");
- Body1 5= 20;             
- Body1 6= -20;          } 
+ Body1 5= 13;             
+ Body1 6= -13;          } 
 
  Thread.Sleep(100);
    }

@@ -1,16 +1,11 @@
 ﻿using Microsoft.CSharp;
-using Microsoft.Win32;
 using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using UnityEditor.Compilation;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
-using Debug = UnityEngine.Debug;
 
 public class Compiler : MonoBehaviour
 {
@@ -41,7 +36,7 @@ public class Compiler : MonoBehaviour
         string Output =robot.nameWithoutSpace+ ".dll";
         string OutputCSCode =robot.code + ".txt";
         textError.text = "";
-        System.CodeDom.Compiler.CompilerParameters parameters = new CompilerParameters();
+        CompilerParameters parameters = new CompilerParameters();
         parameters.GenerateExecutable = false;
         parameters.GenerateInMemory = true;
         parameters.ReferencedAssemblies.Add("System.dll");
